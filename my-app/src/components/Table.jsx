@@ -80,6 +80,48 @@ const Table = () => {
                         </tbody>
 
                     </table>
+                    {/* functionality for pagination */}
+                    <div className="flex justify-between items-center px-4 py-2 bg-white border-t">
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.max(p - 1, 0))}
+                        disabled={currentPage === 0}
+                        className="px-3 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+
+                    <span className="text-sm">
+                        Page {currentPage + 1} of {Math.ceil(sortedData.length / rowsPerPage)}
+                    </span>
+
+                    <button
+                        onClick={() =>
+                        setCurrentPage((p) =>
+                            p + 1 < Math.ceil(sortedData.length / rowsPerPage) ? p + 1 : p
+                        )
+                        }
+                        disabled={currentPage >= Math.ceil(sortedData.length / rowsPerPage) - 1}
+                        className="px-3 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+
+                    <select
+                        className="ml-4 px-2 py-1 border rounded text-sm"
+                        value={rowsPerPage}
+                        onChange={(e) => {
+                        setRowsPerPage(Number(e.target.value));
+                        setCurrentPage(0); 
+                        }}
+                    >
+                        {[5, 10, 15].map((num) => (
+                        <option key={num} value={num}>
+                            Show {num}
+                        </option>
+                        ))}
+                    </select>
+                    </div>
+
                 </div>
             </div>
 
