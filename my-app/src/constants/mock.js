@@ -3,35 +3,43 @@ export const TABLE_HEADER = [
         id : "select", 
         label : "",
         isSticky : "true",
+        with : 40,
     },
     {
         id : "name", 
         label : "Name",
+        with : 100,
     },
     {
         id : "description", 
         label : "Description",
+        with : 100,
     },
     {
         id : "poNum", 
         label : "PO/PI Number",
+        with : 100,
     },
     {
         id : "amount", 
         label : "Amount",
         isSorting : "true",
+        with : 100,
     },
     {
         id : "created_date", 
         label : "Created Date",
+        with : 200,
     },
     {
         id : "initiated_by", 
         label : "Initiated By",
+        with : 100,
     },
     {
         id : "tooltip", 
         label : "Tooltip",
+        with : 200,
     },
 ];
 

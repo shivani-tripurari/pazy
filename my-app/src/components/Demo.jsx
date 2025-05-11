@@ -48,6 +48,7 @@ const Demo = () => {
                 <h1>This is from dumb test component.</h1>
                <TableCore 
                 columns={columns}
+                setColumns={setColumns}
                 data={data}
                 selectedRows={selectedRows}
                 onRowSelect={(id)=>{
@@ -72,6 +73,7 @@ const Demo = () => {
                 rowsPerPage={rowsPerPage}
                 onPageChange={setCurrentPage}
                 onRowsPerPageChange={setRowsPerPage}
+                // handleResize={handleResize}
                />
             </div>
 

@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css";
 
 const TableCore = ({
   columns,
+  setColumns,
   data,
   selectedRows,
   onRowSelect,
@@ -17,6 +18,10 @@ const TableCore = ({
   onPageChange,
   onRowsPerPageChange,
 }) => {
+
+  const tableRef = useRef(null);
+  const resizingColId = useRef(null);
+
   const sortedData = useMemo(() => {
     if (!sortConfig) return data;
     const sorted = [...data].sort((a, b) => {
@@ -36,19 +41,56 @@ const TableCore = ({
     paginatedData.length > 0 &&
     paginatedData.every((row) => selectedRows[row.tableId]);
 
+    const startResizing = (e, columnId) => {
+      resizingColId.current = columnId;
+      document.addEventListener("mousemove", handleResizing);
+      document.addEventListener("mouseup", stopResizing);
+    };
+  
+    const handleResizing = (e) => {
+      if (!resizingColId.current) return;
+  
+      const colIndex = columns.findIndex((c) => c.id === resizingColId.current);
+      if (colIndex === -1) return;
+  
+      const tableLeft = tableRef.current.getBoundingClientRect().left;
+      const currentOffset = columns
+        .slice(0, colIndex)
+        .reduce((sum, col) => sum + (col.width || 150), 0);
+      const newWidth = e.clientX - tableLeft - currentOffset;
+  
+      if (newWidth >= 50) {
+        const updatedCols = [...columns];
+        updatedCols[colIndex] = {
+          ...updatedCols[colIndex],
+          width: newWidth,
+        };
+        setColumns(updatedCols);
+      }
+    };
+  
+    const stopResizing = () => {
+      document.removeEventListener("mousemove", handleResizing);
+      document.removeEventListener("mouseup", stopResizing);
+      resizingColId.current = null;
+    };
+
   return (
-    <div className="p-1 mt-4">
+    <div className="p-1 mt-4" ref={tableRef}>
       <div className="overflow-x-auto border rounded shadow-md">
-        <table className="min-w-full table-fixed">
+        <div style={{ minWidth: `${columns.length * 200}px`, maxWidth: "100%" }}>
+        <table className="w-full table-fixed">
           <thead className="bg-gray-100">
             <tr>
               {columns.map((col, i) => (
                 <th
                   key={col.id}
-                  className={`px-4 py-2 text-left ${
+                  style={{position: 'relative', width: col.width || 150}}
+                  className={`px-4 py-2 text-left border-l border-r ${
                     col.isSticky ? "sticky left-0 z-20 bg-gray-100" : ""
                   }`}
                 >
+                  <div className="px-2">
                   {col.id === "select" ? (
                     <input
                       type="checkbox"
@@ -57,7 +99,16 @@ const TableCore = ({
                       onChange={(e) => onSelectAll(e.target.checked)}
                     />
                   ) : (
-                    <>{col.label}</>
+                    <>
+                      {col.label}
+                    </>
+                    
+                  )}</div>
+                   {col.id !== "select" && (
+                    <div
+                      onMouseDown={(e) => startResizing(e, col.id)}
+                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize bg-transparent group-hover:bg-blue-300"
+                    />
                   )}
                 </th>
               ))}
@@ -69,7 +120,8 @@ const TableCore = ({
                 {columns.map((col) => (
                   <td
                     key={col.id}
-                    className={`px-4 py-2 border-t text-sm ${
+                    style={{width:col.width}}
+                    className={`px-4 py-2 border-t text-sm border-l border-r ${
                       col.isSticky ? "sticky left-0 z-10 bg-white" : ""
                     }`}
                   >
@@ -88,7 +140,7 @@ const TableCore = ({
             ))}
           </tbody>
         </table>
-
+        </div>
         {/* Pagination */}
         <div className="flex justify-between items-center px-4 py-2 bg-white border-t">
           <button
