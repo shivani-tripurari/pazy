@@ -1,9 +1,5 @@
 import React, {useState, useMemo} from "react";
 import { TABLE_HEADER, INITIAL_DATA } from "../constants/mock.js";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { ResizableBox } from "react-resizable";
-import "react-resizable/css/styles.css";
-
 import TableCore from "./TableCore.jsx";
 
 const Demo = () => {
@@ -36,8 +32,6 @@ const Demo = () => {
         (currentPage + 1) * rowsPerPage
       );
 
-    // for dragging feature
-
       const isAllSelected = () => {
         return paginatedData?.length > 0 && paginatedData.every((row)=>selectedRows[row.tableId]);
       }
@@ -68,12 +62,10 @@ const Demo = () => {
                 }}
                 sortConfig={sortConfig}
                 onSortChange={setSortConfig}
-                // onDragEnd={handleDragEnd}
                 currentPage={currentPage}
                 rowsPerPage={rowsPerPage}
                 onPageChange={setCurrentPage}
                 onRowsPerPageChange={setRowsPerPage}
-                // handleResize={handleResize}
                />
             </div>
 

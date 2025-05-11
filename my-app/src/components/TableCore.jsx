@@ -75,45 +75,78 @@ const TableCore = ({
       resizingColId.current = null;
     };
 
+    const handleColumnDragEnd = (result) => {
+      const {source, destination} = result;
+      if(!destination || source.index === destination.index) return;
+      const updatedCols = Array.from(columns);
+      const[moved] = updatedCols.splice(source.index, 1);
+      updatedCols.splice(destination
+        .index, 0, moved
+      );
+      setColumns(updatedCols);
+    }
+
   return (
     <div className="p-1 mt-4" ref={tableRef}>
       <div className="overflow-x-auto border rounded shadow-md">
         <div style={{ minWidth: `${columns.length * 200}px`, maxWidth: "100%" }}>
-        <table className="w-full table-fixed">
-          <thead className="bg-gray-100">
-            <tr>
-              {columns.map((col, i) => (
-                <th
-                  key={col.id}
-                  style={{position: 'relative', width: col.width || 150}}
-                  className={`px-4 py-2 text-left border-l border-r ${
-                    col.isSticky ? "sticky left-0 z-20 bg-gray-100" : ""
-                  }`}
+        <table className="w-full table-fixed select-none">
+          <DragDropContext onDragEnd={handleColumnDragEnd}>
+            <Droppable 
+              droppableId="columns-droppable"
+              direction="horizontal"
+            >
+              {(provided) => (
+                <thead className="bg-gray-100" 
+                ref={provided.innerRef} 
+                {...provided.droppableProps}
                 >
-                  <div className="px-2">
-                  {col.id === "select" ? (
-                    <input
-                      type="checkbox"
-                      className="cursor-pointer"
-                      checked={isAllSelected()}
-                      onChange={(e) => onSelectAll(e.target.checked)}
-                    />
-                  ) : (
-                    <>
-                      {col.label}
-                    </>
-                    
-                  )}</div>
-                   {col.id !== "select" && (
-                    <div
-                      onMouseDown={(e) => startResizing(e, col.id)}
-                      className="absolute right-0 top-0 h-full w-2 cursor-col-resize bg-transparent group-hover:bg-blue-300"
-                    />
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
+                  <tr>
+                    {columns.map((col, i) => (
+                      <Draggable draggableId={col.id} index={i} key={col.id}
+                        isDragDisabled={col.id === "select"}
+                      >
+                        {(dragProvided) => (
+                          <th
+                            ref={dragProvided.innerRef}
+                            {...dragProvided.draggableProps}
+                            {...dragProvided.dragHandleProps}
+                            key={col.id}
+                            style={{position: 'relative', width: col.width || 150}}
+                            className={`px-4 py-2 text-left border-l border-r ${
+                              col.isSticky ? "sticky left-0 z-20 bg-gray-100" : ""
+                            }`}
+                          >
+                            <div className="px-2">
+                            {col.id === "select" ? (
+                              <input
+                                type="checkbox"
+                                className="cursor-pointer"
+                                checked={isAllSelected()}
+                                onChange={(e) => onSelectAll(e.target.checked)}
+                              />
+                            ) : (
+                              <>
+                                {col.label}
+                              </>
+                              
+                            )}</div>
+                            {col.id !== "select" && (
+                              <div
+                                onMouseDown={(e) => startResizing(e, col.id)}
+                                className="absolute right-0 top-0 h-full w-2 cursor-col-resize bg-transparent group-hover:bg-blue-300"
+                              />
+                            )}
+                          </th>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </tr>
+                </thead>
+              )}
+            </Droppable>
+          </DragDropContext>
           <tbody>
             {paginatedData.map((row) => (
               <tr key={row.tableId} className="hover:bg-gray-50">
